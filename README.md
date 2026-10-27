@@ -6,6 +6,12 @@
 
 ## 작업 환경 구조
 
+![OMP, 로컬 라우터, Qwen 4B·35B, Codex, Claude와 검증 사이로 패킷이 자동 이동하는 구조도](docs/traffic-flow.gif)
+
+버튼 없이 자동으로 반복 재생됩니다. 로컬 응답, 코드 구현, 설계, 검증 실패 후 재작업 경로를 차례로 보여주는 흐름 예시입니다.
+
+### 정적 구조도
+
 ```mermaid
 flowchart LR
     User[사용자] --> OMP[OMP · 요청 진입점]
@@ -62,3 +68,4 @@ OMP는 이 문서의 요청 진입점 역할명입니다. Qwen 4B와 Qwen 35B는
 - [README.md](README.md) — 전체 구조와 대표 요청 흐름
 - [RULES.md](RULES.md) — 라우팅, 작업 인계, 검증과 재작업 규칙
 - [AGENTS.md](AGENTS.md) — 이 문서 저장소를 수정하는 에이전트의 작업 기준
+- `docs/traffic-flow.gif` — 자동 재생되는 요청 흐름 구조도
