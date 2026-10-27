@@ -1,8 +1,10 @@
-# AgentMesh contribution rules
+# 저장소 수정 규칙
 
-- Keep this app a static, dependency-free runtime. Node is only needed for the local server and development checks.
-- Keep user-facing labels and instructions in Korean. Maintain simulation wording; do not present scripted events as live model traffic or measured metrics.
-- Define node roles and scenarios in `src/flows.js`; preserve continuous routes and a final verification before returning to OMP.
-- Preserve keyboard controls, reduced-motion behavior and mobile map scrolling when changing the interface.
-- Run `npm test` and `npm run test:browser` for flow or interaction changes. Use `npx playwright install chromium` if the test browser is missing.
-- Never include API keys or credentials in this static frontend.
+- 이 저장소는 작업 환경의 구조와 규칙을 문서로 관리합니다.
+- 사용자가 요청하지 않은 앱, 실행 코드, 의존성, 빌드 설정, 테스트 프레임워크, 배포 설정을 추가하지 않습니다.
+- 설명은 한국어로 작성하고, 구조도는 README에서 바로 볼 수 있도록 Mermaid로 관리합니다.
+- 전체 구조와 대표 흐름은 `README.md`, 운영 세부 기준은 `RULES.md`에 기록합니다.
+- 설계 제안과 실제 운영 상태를 구분합니다. 연결 여부나 성능 수치를 근거 없이 단정하지 않습니다.
+- 역할이나 경로를 바꾸면 구조도, 흐름 표와 운영 규칙이 서로 일치하도록 수정합니다.
+- 변경 후 Markdown 링크, 문서 간 일관성과 불필요한 코드 파일 포함 여부를 확인합니다.
+- API 키, 토큰, 비밀번호와 민감한 요청 내용을 기록하지 않습니다.
