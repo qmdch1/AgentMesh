@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <title>AgentMesh — 요청의 흐름을 보다</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="./"><span class="brand-mark">◈</span> AgentMesh <span class="version">/ FLOW STUDIO</span></a><div class="top-meta"><span class="status-dot"></span> 로컬 우선 아키텍처 <a href="https://github.com/qmdch1/AgentMesh" target="_blank" rel="noreferrer">GitHub ↗</a></div></header>
+  <main>
+    <div class="intro"><div><div class="eyebrow">ONE REQUEST. THE RIGHT AGENT.</div><h1>요청 하나, 최적의 경로.</h1><p>가벼운 작업은 로컬에서, 복잡한 작업은 전문 에이전트에게.<br>요청부터 검증까지, 에이전트 사이의 흐름을 따라가 보세요.</p></div><div class="simulation"><span class="status-dot"></span> INTERACTIVE SIMULATION <small>실제 API 호출 없이 실행되는 설계 데모</small></div></div>
+    <div class="workspace">
+      <aside class="scenario-panel"><div class="section-label">01 / 시나리오 선택</div><h2>어떤 작업을 맡길까요?</h2><div id="scenarios" class="scenarios"></div><div class="request-card"><span class="section-label">예시 요청</span><p id="prompt"></p></div><div class="routing-note"><span>↳ LOCAL FIRST</span><p>로컬에서 먼저 분류하고 필요한 경우에만 클라우드 에이전트로 확장합니다.</p></div></aside>
+      <section class="flow-panel" aria-label="에이전트 요청 흐름"><div class="panel-heading"><div><span class="section-label">02 / 라이브 흐름</span><h2 id="flow-title"></h2></div><span id="run-badge" class="badge">준비됨</span></div>
+        <div class="map-scroll"><div class="map" id="map"><div class="zone local-zone">ON DEVICE <span>로컬 · 분류와 빠른 처리</span></div><div class="zone cloud-zone">CLOUD <span>전문 에이전트</span></div><svg id="connections" viewBox="0 0 920 490" aria-hidden="true"></svg><div id="nodes"></div></div></div>
+        <div class="legend"><span><i class="legend-dot mint"></i>로컬 처리</span><span><i class="legend-dot lavender"></i>클라우드 처리</span><span><i class="legend-dot orange"></i>검증 / 재작업</span><span class="legend-hint">노드를 선택하면 역할을 볼 수 있어요</span></div>
+        <div class="controls"><button id="play" class="primary">▶ 흐름 실행</button><button id="step" class="secondary">한 단계 →</button><button id="reset" class="icon-button" aria-label="흐름 초기화">↺</button><label class="speed-label" for="speed">속도 <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><span id="progress-label">0 / 0 단계</span></div>
+      </section>
+    </div>
+    <div class="bottom-grid"><section class="detail-panel"><span class="section-label">03 / 노드 인사이트</span><div id="node-detail"></div></section><section class="event-panel"><div class="event-heading"><span class="section-label">04 / 요청 타임라인</span><span id="event-count">0 EVENTS</span></div><ol id="timeline" aria-live="polite" aria-relevant="additions"></ol></section></div>
+    <footer><span>AgentMesh <span class="muted">/ 작은 모델부터, 필요한 만큼.</span></span><span>경로와 역할을 설명하는 시뮬레이션 · 성능 측정값 아님</span></footer>
+  </main>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
