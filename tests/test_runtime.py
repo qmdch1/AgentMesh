@@ -491,7 +491,7 @@ class RuntimeTests(unittest.TestCase):
                         type="message_end",
                         message=dict(
                             role="assistant",
-                            model="default_model",
+                            model="Qwen3.6-35B-A3B 4bit",
                             content=[dict(type="text", text="done")],
                         ),
                     )
@@ -500,6 +500,20 @@ class RuntimeTests(unittest.TestCase):
             return 0
 
         self.assertEqual(m.run(self.plan(t), executor=fake)["status"], "passed")
+
+    def test_status_without_run_id_is_scoped_to_current_project(self):
+        other = Path(self.tmp.name) / "other-project"
+        other.mkdir()
+        with patch.object(m, "worker", return_value={"status": "passed"}):
+            first = m.run(self.plan(task("a")))
+            plan = self.plan(task("b"))
+            plan["workspace"] = str(other)
+            second = m.run(plan)
+        self.assertEqual(m.status(workspace=self.ws)["run_id"], first["run_id"])
+        self.assertEqual(m.status(workspace=other)["run_id"], second["run_id"])
+        self.assertEqual(
+            m.status(workspace=Path(self.tmp.name) / "unused")["status"], "no_runs"
+        )
 
 
 if __name__ == "__main__":

@@ -21,5 +21,3 @@ goal:
   enabled: false
 tools:
   approvalMode: yolo
-extensions:
-  - ./.omp/extensions/agentmesh.ts

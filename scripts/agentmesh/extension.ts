@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync, writeFileSync, appendFileSync, existsSync, realpathSync } from 'node:fs';
 import { resolve, dirname, relative, isAbsolute, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeScopedText } from '../../scripts/agentmesh/scoped_write.mjs';
+import { writeScopedText } from './scoped_write.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const state = resolve(root, '.agentmesh');
@@ -13,8 +13,8 @@ export default function(pi: any) {
   pi.setLabel('AgentMesh');
   pi.registerProvider('agentmesh-local', {
     baseUrl: 'http://127.0.0.1:18541/v1', apiKey: 'agentmesh-loopback', api: 'openai-completions',
-    models: [{ id: 'default_model', name: 'Qwen3.6-35B-A3B · MLX 4bit', api: 'openai-completions',
-      input: ['text'], reasoning: true, contextWindow: 16384, maxTokens: 4096, compactionModel: 'agentmesh-local/default_model',
+    models: [{ id: 'Qwen3.6-35B-A3B 4bit', name: 'Qwen3.6-35B-A3B 4bit', api: 'openai-completions',
+      input: ['text'], reasoning: true, contextWindow: 16384, maxTokens: 4096, compactionModel: 'agentmesh-local/Qwen3.6-35B-A3B 4bit',
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       thinking: { mode: 'effort', efforts: ['high'], defaultLevel: 'high', requiresEffort: false },
       compat: { thinkingFormat: 'qwen-chat-template', supportsReasoningEffort: false, supportsDeveloperRole: false,
@@ -36,6 +36,7 @@ export default function(pi: any) {
   });
   pi.on('before_provider_request', async (event: any, ctx: any) => {
     const p={...event.payload};
+    if (ctx.model?.provider==='agentmesh-local') p.model='default_model';
     if (ctx.model?.provider==='anthropic') { delete p.speed; if(['priority','fast'].includes(p.service_tier)) delete p.service_tier; }
     if (ctx.model?.provider==='openai-codex') p.service_tier='priority';
     mkdirSync(state,{recursive:true,mode:0o700});
@@ -48,7 +49,10 @@ export default function(pi: any) {
       if(!model || !(await pi.setModel(model))) throw new Error('Required coordinator model unavailable');
       pi.setThinkingLevel('high');
     }
-    return { systemPrompt: readFileSync(resolve(root, `scripts/agentmesh/${worker ? 'worker' : 'coordinator'}.md`), 'utf8') };
+    const role = !worker ? 'You are the coordinator. Use mesh_run for implementation.' : spec?.task?.profile==='local'
+      ? 'You are the Qwen local worker (profile local). Use mesh_write with lines:string[] and final_newline:boolean for writes. No write/edit/bash tools are available. Example: lines=["연결하기"], final_newline=true writes 13 UTF-8 bytes. Checks run after you return.'
+      : `You are a Claude cloud worker (profile ${spec?.task?.profile}). Use your provided native edit/write/bash tools. mesh_write is Qwen-only and is not required or available to you.`;
+    return { systemPrompt: readFileSync(resolve(root, `scripts/agentmesh/${worker ? 'worker' : 'coordinator'}.md`), 'utf8') + `\n${role}\nCurrent workspace: ${ctx.cwd}\n${worker ? 'Implement only your assigned part directly.' : 'Use this workspace for mesh_run unless the user explicitly names another target.'}` };
   });
   if (worker) {
     if (spec?.task?.profile === 'local') pi.registerTool({
@@ -82,6 +86,7 @@ export default function(pi: any) {
       const request=resolve(state,`request-${crypto.randomUUID()}.json`);
       writeFileSync(request,JSON.stringify(payload),{mode:0o600});args.push('--request',request);
     } else if(payload?.run_id) args.push('--run-id',payload.run_id);
+    else if(payload?.workspace) args.push('--workspace',payload.workspace);
     return new Promise((done,fail) => {
       const p=spawn('/usr/bin/python3',args,{cwd:root,stdio:['ignore','pipe','pipe'],detached:true});
       let output='',error='';
@@ -100,6 +105,6 @@ export default function(pi: any) {
   }
   const task=z.object({id:z.string(),profile:z.enum(['code','code_deep','hard','hard_deep','design','design_deep','local']),instruction:z.string(),acceptance:z.array(z.string()).min(1),depends_on:z.array(z.string()).default(() => []),context_files:z.array(z.string()).default(() => []),context_images:z.array(z.string()).default(() => []),read_paths:z.array(z.string()).default(() => []),write_paths:z.array(z.string()).default(() => []),checks:z.array(z.array(z.string())).default(() => []),scope_confirmed:z.boolean().default(false)});
   pi.registerTool({name:'mesh_run',label:'AgentMesh parts',description:'Execute a scoped task DAG using fixed OMP worker models, collect results and run verification. Read-only parts run concurrently; writing parts run serially. Retry an existing run_id with the COMPLETE revised plan; successful unchanged parts are reused. Never use this tool to summarize a plan instead of doing work.',parameters:z.object({plan:z.object({workspace:z.string(),common_context:z.string(),tasks:z.array(task).min(1).max(16),task_timeout:z.number().int().min(30).max(1200).default(600),run_timeout:z.number().int().min(60).max(7200).default(1800)}),run_id:z.string().optional()}),execute:async (_id: string,params: any,signal: AbortSignal,onUpdate: any)=>invoke('run',params,signal,onUpdate)});
-  for (const action of ['status','doctor']) pi.registerTool({name:`mesh_${action}`,label:`AgentMesh ${action}`,description:action==='status'?'Read durable task results and interruption checkpoints.':'Inspect configured worker models and local installation (does not claim cloud inference works).',parameters:z.object({run_id:z.string().optional()}),execute:async (_id: string,p: any,s: AbortSignal)=>invoke(action,p,s)});
+  for (const action of ['status','doctor']) pi.registerTool({name:`mesh_${action}`,label:`AgentMesh ${action}`,description:action==='status'?'Read this workspace durable task results and interruption checkpoints.':'Inspect configured worker models and local installation (does not claim cloud inference works).',parameters:z.object({run_id:z.string().optional()}),execute:async (_id: string,p: any,s: AbortSignal,_update: any,ctx: any)=>invoke(action,{...p,workspace:ctx.cwd},s)});
   pi.registerCommand('mesh-doctor',{description:'AgentMesh connection and installation status',handler:async (_args: string,ctx: any)=>{const result=await invoke('doctor',{},undefined);ctx.ui.notify(result.content[0].text,'info');}});
 }

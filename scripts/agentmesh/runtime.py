@@ -399,12 +399,12 @@ def worker(task, plan, run_dir, results, executor=None):
         "--cwd",
         str(workspace),
         "--config",
-        str(ROOT / ".omp/config.yml"),
+        str(ROOT / "scripts/agentmesh/worker-defaults.yml"),
         "--config",
         str(worker_config),
         "--no-extensions",
         "--extension",
-        str(ROOT / ".omp/extensions/agentmesh.ts"),
+        str(ROOT / "scripts/agentmesh/extension.ts"),
         "--no-skills",
         "--no-rules",
         "--no-session",
@@ -430,7 +430,7 @@ def worker(task, plan, run_dir, results, executor=None):
         native = attempt_dir / "native-request.md"
         native.write_text(
             (ROOT / "scripts/agentmesh/worker.md").read_text()
-            + "\nThis is a delegated worker: implement this part directly; coordinator-only mesh_run rules do not apply.\n"
+            + "\nYou are a cloud Codex implementation worker. Use native Codex tools directly. mesh_write is Qwen-only and is not required or available to you. Coordinator-only mesh_run rules do not apply.\n"
             + request.read_text()
         )
         env["AGENTMESH_STDIN"] = str(native)
@@ -741,6 +741,34 @@ def cancel(signum, frame):
                     os.killpg(p.pid, signal.SIGTERM)
 
 
+def status(run_id=None, workspace=None):
+    paths = sorted((STATE / "runs").glob("*/state.json"), reverse=True)
+    if run_id:
+        if not ID.fullmatch(run_id):
+            raise ValueError("Invalid run id")
+        paths = [STATE / "runs" / run_id / "state.json"]
+    elif workspace:
+        target = Path(workspace).resolve()
+        paths = [
+            p
+            for p in paths
+            if Path(
+                json.loads((p.parent / "plan.json").read_text())["workspace"]
+            ).resolve()
+            == target
+        ]
+    result = json.loads(paths[0].read_text()) if paths else {"status": "no_runs"}
+    if result.get("status") == "running":
+        try:
+            os.kill(result.get("owner_pid", 0), 0)
+        except ProcessLookupError:
+            result["status"] = "interrupted"
+            for item in result["results"].values():
+                if item.get("status") == "running":
+                    item["status"] = "interrupted"
+    return result
+
+
 def main():
     signal.signal(signal.SIGTERM, cancel)
     signal.signal(signal.SIGINT, cancel)
@@ -757,27 +785,17 @@ def main():
     parser.add_argument("action", choices=["run", "status", "doctor"])
     parser.add_argument("--request")
     parser.add_argument("--run-id")
+    parser.add_argument("--workspace")
     args = parser.parse_args()
     if args.action == "run":
         request = json.loads(Path(args.request).read_text())
         result = run(request["plan"], request.get("run_id"))
     elif args.action == "status":
-        paths = sorted((STATE / "runs").glob("*/state.json"), reverse=True)
-        if args.run_id:
-            if not ID.fullmatch(args.run_id):
-                raise ValueError("Invalid run id")
-            paths = [STATE / "runs" / args.run_id / "state.json"]
-        result = json.loads(paths[0].read_text()) if paths else {"status": "no_runs"}
-        if result.get("status") == "running":
-            try:
-                os.kill(result.get("owner_pid", 0), 0)
-            except ProcessLookupError:
-                result["status"] = "interrupted"
-                for item in result["results"].values():
-                    if item.get("status") == "running":
-                        item["status"] = "interrupted"
+        result = status(args.run_id, args.workspace)
     else:
         result = {
+            "installation": str(ROOT),
+            "model_name": "Qwen3.6-35B-A3B 4bit",
             "omp": shutil.which("omp"),
             "codex": shutil.which("codex"),
             "local_runtime": (STATE / "venv/bin/python").exists(),

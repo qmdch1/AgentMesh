@@ -32,7 +32,7 @@
     "thinking": "high"
   },
   "local": {
-    "model": "agentmesh-local/default_model",
+    "model": "agentmesh-local/Qwen3.6-35B-A3B 4bit",
     "thinking": "high"
   }
 }

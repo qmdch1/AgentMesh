@@ -32,7 +32,12 @@ def main():
         dict(
             id="edit",
             profile="local" if a.local else "design",
-            instruction='Use mesh_write to replace label.txt with lines=["연결하기"], final_newline=true: exactly 13 UTF-8 bytes. Only edit label.txt. Report checks as pending for the runner; do not run bash.',
+            instruction=(
+                'Use mesh_write to replace label.txt with lines=["연결하기"], final_newline=true: exactly 13 UTF-8 bytes.'
+                if a.local
+                else "Use your native edit/write tool to replace label.txt with 연결하기 plus one LF (codepoint 10), exactly 13 UTF-8 bytes."
+            )
+            + " Only edit label.txt. Report checks as pending for the runner; do not run bash.",
             acceptance=["label.txt has exactly 연결하기 plus LF, 13 UTF-8 bytes"],
             context_files=["label.txt"],
             write_paths=["label.txt"],

@@ -2,8 +2,11 @@
 
 | 구성 | 실제 동작 |
 |---|---|
-| 시작 | `.omp/config.yml` + `.omp/extensions/agentmesh.ts` 자동 로드; Opus 5.5/high 고정 |
-| 속도 | Claude 일반, Codex Fast(`service_tier=fast`). 다른 폴더의 전역 OMP 설정은 수정하지 않음 |
+| 시작 | `~/.omp/agent/extensions/agentmesh.ts` 전역 자동 로드; 어느 프로젝트에서든 Opus 5.5/high 고정. 설치 전 열린 세션은 재시작 |
+| 설치 위치 | `~/.omp/agentmesh`에 실행 코드·모델·기록 보관. 원본 저장소 경로와 독립; 저장소 `.agentmesh`는 공유 상태 심볼릭 링크 |
+| 속도 | Claude 일반, Codex Fast(`service_tier=fast`). 전역 설정의 기존 부가 항목 보존·변경 전 백업 |
+| 작업 폴더 | OMP 실행 위치를 총괄에 명시; 각 프로젝트 AGENTS.md/CLAUDE.md를 확인한 뒤 해당 폴더를 작업 대상으로 사용 |
+| 모델 표시 | `agentmesh-local/Qwen3.6-35B-A3B 4bit`; 어느 폴더에서든 `omp models agentmesh-local`로 확인 |
 | 계정 | Claude는 OMP 인증, Codex는 기존 CLI 인증 사용. AgentMesh는 로그인 토큰·비밀번호를 읽거나 복제하지 않음 |
 | 프로필 | `scripts/agentmesh/profiles.json`; 실행마다 모델·강도 명시, 다른 모델로 자동 대체 금지 |
 | 실행 | `mesh_run`이 독립 읽기 작업 최대 3개 병렬, 쓰기 작업 직렬 실행. Claude/Qwen은 작업별 OMP 프로세스, Codex는 작업별 ephemeral CLI 실행; 모두 별도 문맥 사용 |

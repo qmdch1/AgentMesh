@@ -6,7 +6,7 @@ OMP 기반 한국어 복합 요청 워크플로우 · M5 Max / 36GB / 2TB
 
 ## 모델 선택
 
-이 폴더에서 `omp` 실행. 프로젝트 설정이 총괄과 실행 도구를 로드합니다. 최초 설치·복구는 `./scripts/setup.sh`, 자체 검사는 `./scripts/verify.sh`, 세션 내 상태 확인은 `/mesh-doctor`.
+최초 설치·복구는 `./scripts/setup.sh`. 이후 어느 프로젝트에서든 `omp`를 실행하면 전역 워크플로우가 로드됩니다. 기존 OMP 세션은 재시작합니다. 자체 검사는 `./scripts/verify.sh`, 세션 내 상태 확인은 `/mesh-doctor`.
 
 | 역할 / 프로필 | 모델 ID | 추론 설정 | 배정 대상 |
 |---|---|---|---|
@@ -18,7 +18,7 @@ OMP 기반 한국어 복합 요청 워크플로우 · M5 Max / 36GB / 2TB
 | 설계·문서 심화 | `claude-sonnet-5-5` | high | 상충 조건·큰 영향 범위·세부 일관성 검토 |
 | 로컬 수정·분석 | `Qwen3.6-35B-A3B` · MLX 4bit | Thinking on | 범위가 확정된 소규모 수정·자료 분석; 수정 위치·영향 범위·검사 방법 사전 확정 |
 
-Qwen3.5-4B는 기본 구성에서 제외합니다. 연결은 `scripts/agentmesh/profiles.json`에서 관리하며, 미등록 작업자가 총괄 모델을 상속하지 않게 합니다. Qwen의 Thinking·서버 추론 예산은 클라우드 effort 등급과 구분합니다.
+Qwen3.5-4B는 기본 구성에서 제외합니다. 연결은 `scripts/agentmesh/profiles.json`에서 관리하며, 미등록 작업자가 총괄 모델을 상속하지 않게 합니다. 전역 설치 위치는 `~/.omp/agentmesh`; 모델 선택기에는 **`Qwen3.6-35B-A3B 4bit`**로 표시됩니다. Qwen의 Thinking·서버 추론 예산은 클라우드 effort 등급과 구분합니다.
 
 **인증 경로:** Claude는 OMP의 기존 로그인, Codex는 기존 Codex CLI 로그인 사용. 토큰 복사·별도 API 키 설정 없음.
 
