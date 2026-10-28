@@ -1,0 +1,25 @@
+modelRoleStorage: project
+modelRoles:
+  default: anthropic/claude-opus-5-5:high
+  plan: anthropic/claude-opus-5-5:high
+  slow: anthropic/claude-opus-5-5:high
+  smol: anthropic/claude-sonnet-5-5:medium
+  task: openai-codex/gpt-6.1-sol:medium
+defaultThinkingLevel: high
+autoResume: false
+prewalk:
+  enabled: false
+  auto: "off"
+tier:
+  anthropic: null
+  openai: priority
+  google: null
+retry:
+  enabled: false
+  waitForUsageReset: false
+goal:
+  enabled: false
+tools:
+  approvalMode: yolo
+extensions:
+  - ./.omp/extensions/agentmesh.ts

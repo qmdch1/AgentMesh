@@ -1,0 +1,38 @@
+{
+  "coordinator": {
+    "model": "anthropic/claude-opus-5-5",
+    "thinking": "high"
+  },
+  "code": {
+    "model": "openai-codex/gpt-6.1-sol",
+    "thinking": "medium",
+    "backend": "codex-cli"
+  },
+  "code_deep": {
+    "model": "openai-codex/gpt-6.1-sol",
+    "thinking": "high",
+    "backend": "codex-cli"
+  },
+  "hard": {
+    "model": "openai-codex/gpt-6-astra",
+    "thinking": "high",
+    "backend": "codex-cli"
+  },
+  "hard_deep": {
+    "model": "openai-codex/gpt-6-astra",
+    "thinking": "xhigh",
+    "backend": "codex-cli"
+  },
+  "design": {
+    "model": "anthropic/claude-sonnet-5-5",
+    "thinking": "medium"
+  },
+  "design_deep": {
+    "model": "anthropic/claude-sonnet-5-5",
+    "thinking": "high"
+  },
+  "local": {
+    "model": "agentmesh-local/default_model",
+    "thinking": "high"
+  }
+}
